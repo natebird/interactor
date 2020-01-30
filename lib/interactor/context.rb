@@ -126,6 +126,58 @@ module Interactor
       raise Failure, self
     end
 
+    # Public: Whether the Interactor::Context was skipped. By default, a
+    # context remains successful even when skipped.
+    #
+    # The "skipped?" method is the inverse of the "success?" method.
+    #
+    # Examples
+    #
+    #   context = Interactor::Context.new
+    #   # => #<Interactor::Context>
+    #   context.skipped?
+    #   # => false
+    #   context.skip!
+    #   # => #<Interactor::Context>
+    #   context.skipped?
+    #   # => true
+    #
+    # Returns false by default or true if skipped.
+    def skipped?
+      @skipped || false
+    end
+
+    # Public: Skip the Interactor::Context. Skipping a context raises an error
+    # that may be rescued by the calling interactor. The context remains successful but
+    # is also flagged as being skipped.
+    #
+    # Optionally the caller may provide a hash of key/value pairs to be merged
+    # into the context before skipping.
+    #
+    # context - A Hash whose key/value pairs are merged into the existing
+    #           Interactor::Context instance. (default: {})
+    #
+    # Examples
+    #
+    #   context = Interactor::Context.new
+    #   # => #<Interactor::Context>
+    #   context.skip!
+    #   # => #<Interactor::Context>
+    #   context.skipped?
+    #   # => true
+    #   context.success?
+    #   # => true
+    #   context.failed?
+    #   # => false
+    #   context.skip!(foo: "baz")
+    #   # => #<Interactor::Context foo="baz">
+    #
+    # Raises Interactor::Failure initialized with the Interactor::Context.
+    def skip!(context = {})
+      context.each { |key, value| self[key.to_sym] = value }
+      @skipped = true
+    end
+
     # Internal: Track that an Interactor has been called. The "called!" method
     # is used by the interactor being invoked with this context. After an
     # interactor is successfully called, the interactor instance is tracked in

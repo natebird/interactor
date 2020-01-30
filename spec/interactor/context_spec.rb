@@ -152,6 +152,90 @@ module Interactor
       end
     end
 
+    describe "#skip!" do
+      let(:context) { Context.build(foo: "bar") }
+
+      it "preserves success" do
+        expect {
+          begin
+            context.skip!
+          rescue
+            nil
+          end
+        }.not_to change {
+          context.success?
+        }
+      end
+
+      it "preserves failure" do
+        expect {
+          begin
+            context.skip!
+          rescue
+            nil
+          end
+        }.not_to change {
+          context.failure?
+        }
+      end
+
+      it "sets skip to true" do
+        expect {
+          begin
+            context.skip!
+          rescue
+            nil
+          end
+        }.to change {
+          context.skipped?
+        }.from(false).to(true)
+      end
+
+      it "preserves the context" do
+        expect {
+          begin
+            context.skip!
+          rescue
+            nil
+          end
+        }.not_to change {
+          context.foo
+        }
+      end
+
+      it "updates the context" do
+        expect {
+          begin
+            context.skip!(foo: "baz")
+          rescue
+            nil
+          end
+        }.to change {
+          context.foo
+        }.from("bar").to("baz")
+      end
+
+      it "updates the context with a string key" do
+        expect {
+          begin
+            context.skip!("foo" => "baz")
+          rescue
+            nil
+          end
+        }.to change {
+          context.foo
+        }.from("bar").to("baz")
+      end
+
+      it "makes the context available from the skip" do
+        begin
+          context.skip!
+        rescue
+          expect(error.context).to eq(context)
+        end
+      end
+    end
+
     describe "#called!" do
       let(:context) { Context.build }
       let(:instance1) { double(:instance1) }
